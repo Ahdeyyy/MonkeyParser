@@ -28,6 +28,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERICK: PRODUCT,
+	token.MODULO:   PRODUCT,
 	token.LPAREN:   CALL,
 }
 
@@ -80,6 +81,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfinix(token.MINUS, p.parseInfixExpression)
 	p.registerInfinix(token.SLASH, p.parseInfixExpression)
 	p.registerInfinix(token.ASTERICK, p.parseInfixExpression)
+	p.registerInfinix(token.MODULO, p.parseInfixExpression)
 	p.registerInfinix(token.EQ, p.parseInfixExpression)
 	p.registerInfinix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfinix(token.LT, p.parseInfixExpression)
@@ -201,8 +203,6 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 	return args
 }
-
-
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
