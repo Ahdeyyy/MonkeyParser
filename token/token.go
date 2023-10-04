@@ -14,8 +14,8 @@ const (
 	EOF     = "EOF"
 
 	// IDENTIFIERS + LITERALS
-	IDENT = "IDENT"
-	INT   = "INT"
+	IDENT  = "IDENT"
+	INT    = "INT"
 	STRING = "STRING"
 
 	//OPERATORS
@@ -39,10 +39,12 @@ const (
 	COMMA     = ","
 	SEMICOLON = ";"
 
-	LPAREN = "("
-	RPAREN = ")"
-	LBRACE = "{"
-	RBRACE = "}"
+	LPAREN   = "("
+	RPAREN   = ")"
+	LBRACE   = "{"
+	RBRACE   = "}"
+	LBRACKET = "["
+	RBRACKET = "]"
 
 	// KEYWORDS
 	FUNCTION = "FUNCTION"

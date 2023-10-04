@@ -82,6 +82,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LPAREN, l.ch)
 	case ')':
 		tok = newToken(token.RPAREN, l.ch)
+	case '[':
+		tok = newToken(token.LBRACKET, l.ch)
+	case ']':
+		tok = newToken(token.RBRACKET, l.ch)
 	case ',':
 		tok = newToken(token.COMMA, l.ch)
 	case '+':
@@ -123,7 +127,7 @@ func (l *Lexer) readNumber() string {
 }
 
 func (l *Lexer) readString() string {
-	position := l.position + 1 
+	position := l.position + 1
 	for {
 		l.readChar()
 
@@ -132,7 +136,7 @@ func (l *Lexer) readString() string {
 		}
 	}
 
-	return l.input[position: l.position]
+	return l.input[position:l.position]
 }
 
 func isDigit(ch byte) bool {
