@@ -31,6 +31,8 @@ const (
 
 	EQ     = "=="
 	NOT_EQ = "!="
+	G_EQ   = ">="
+	L_EQ   = "<="
 
 	// DELIMETERS
 	COMMA     = ","
