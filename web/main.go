@@ -12,6 +12,9 @@ import (
 )
 
 func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "Hello world!, I am monkey interpreter, send me some code to compile and run on /compile endpoint")
+	})
 	http.HandleFunc("/compile", handler)
 	fmt.Println("Listening on port 8080")
 	http.ListenAndServe(":8080", nil)
