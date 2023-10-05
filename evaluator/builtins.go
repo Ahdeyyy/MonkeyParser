@@ -5,7 +5,7 @@ import (
 	"monkey/object"
 )
 
-var builtins = map[string]*object.Builtin{
+var Builtins = map[string]*object.Builtin{
 	"len": {
 		Fn: func(args ...object.Object) object.Object {
 			if len(args) != 1 {
