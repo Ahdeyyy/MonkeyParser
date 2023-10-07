@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"monkey/evaluator"
 	"monkey/lexer"
 	"monkey/object"
@@ -64,17 +63,14 @@ func handler(c *fiber.Ctx) error {
 		},
 	}
 
-	fmt.Println(evaluator.Builtins)
 	evaluated := evaluator.Eval(program, env)
 
-	fmt.Println(output)
 
 	c.JSON(fiber.Map{
 		"output": output,
 		"eval":   evaluated.Inspect(),
 	})
 
-	// c.SendString(output)
 
 	return nil
 
