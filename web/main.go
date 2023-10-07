@@ -1,71 +1,87 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"monkey/evaluator"
 	"monkey/lexer"
 	"monkey/object"
 	"monkey/parser"
-	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello world!, I am monkey interpreter, send me some code to compile and run on /compile endpoint")
+
+	app := fiber.New()
+	app.Use(cors.New())
+	app.Use(logger.New())
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello world!, I am monkey interpreter, send me some code to compile and run on /compile endpoint")
 	})
-	http.HandleFunc("/compile", handler)
-	fmt.Println("Listening on port 8080")
-	http.ListenAndServe(":8080", nil)
+
+	app.Post("/compile", handler)
+
+	app.Listen(":8080")
+
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func handler(c *fiber.Ctx) error {
 
-	 var data map[string]interface{}
+	c.Set("Content-Type", "application/json")
+	c.Set("Access-Control-Allow-Origin", "*")
 
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	output := make([]string, 0)
 
-	code, ok := data["code"].(string)
-    if !ok {
-        http.Error(w, "Missing or invalid 'name' field in JSON", http.StatusBadRequest)
-        return
-    }
+	code := c.FormValue("code", "")
+
 	env := object.NewEnvironment()
 	l := lexer.New(code)
 	p := parser.New(l)
-	
+
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {
-		printParserErrors(w, p.Errors())
-		return
+		output = printParserErrors( p.Errors())
+		c.JSON(
+			fiber.Map{
+				"output": output,
+				"eval":   "error",
+			},
+		)
+		return nil
 	}
+
+	
 
 	evaluator.Builtins["puts"] = &object.Builtin{
 		Fn: func(args ...object.Object) object.Object {
 			for _, arg := range args {
-				io.WriteString(w, arg.Inspect())
-				io.WriteString(w, "\n")
+				output = append(output, arg.Inspect())
 			}
 			return evaluator.NULL
 		},
 	}
-	evaluated :=  evaluator.Eval(program, env)
-	if evaluated != nil {
-		if evaluated.Inspect() != "null" {
-			io.WriteString(w, evaluated.Inspect())
-			io.WriteString(w, "\n")
-		}
 
-	}
+	fmt.Println(evaluator.Builtins)
+	evaluated := evaluator.Eval(program, env)
+
+	fmt.Println(output)
+
+	c.JSON(fiber.Map{
+		"output": output,
+		"eval":   evaluated.Inspect(),
+	})
+
+	// c.SendString(output)
+
+	return nil
 
 }
 
-func printParserErrors(out io.Writer, errors []string) {
+func printParserErrors( errors []string) []string {
+	out := make([]string, 0)
 	const MONKEY_FACE = `            __,__
    .--.  .-"     "-.  .--.
   / .. \/  .-. .-.  \/ .. \
@@ -79,10 +95,11 @@ func printParserErrors(out io.Writer, errors []string) {
            '-----'
 `
 
-	io.WriteString(out, MONKEY_FACE)
-	io.WriteString(out, "Woops! We ran into some monkey business here!\n")
-	io.WriteString(out, " parser errors:\n")
+	out = append(out, MONKEY_FACE)
+	out = append(out, "Woops! We ran into some monkey business here!")
+	out = append(out, " parser errors:")
 	for _, msg := range errors {
-		io.WriteString(out, "\t"+msg+"\n")
+		out = append(out, "\t"+msg)
 	}
+	return out
 }
